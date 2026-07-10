@@ -17,6 +17,12 @@ create policy "Users can view own profile"
   on public.profiles for select
   using (auth.uid() = id);
 
+-- Each user can update their own profile row (needed so the checkout route
+-- can save the Stripe customer id tied to their account).
+create policy "Users can update own profile"
+  on public.profiles for update
+  using (auth.uid() = id);
+
 -- Automatically create a profile row whenever a new user signs up.
 create or replace function public.handle_new_user()
 returns trigger as $$
