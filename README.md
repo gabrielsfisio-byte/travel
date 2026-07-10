@@ -70,15 +70,15 @@ micro animações via Framer Motion.
 - [x] 9 destinos fictícios cobrindo todas as categorias pedidas (praia, neve, Europa, Ásia, América, natureza, luxo, aventura, romântico, família)
 - [x] Cards modernos com favoritar, rating, promoção, badge "em alta"
 - [x] Store global (Zustand) já preparado com o cálculo de `TripScore` (orçamento, conforto, aventura, sustentabilidade, pontuação geral) para a próxima etapa (Planejador)
+- [x] `/planejador` — fluxo passo a passo completo (destino → voo → hotel → transporte → atrações → restaurantes → resumo) com orçamento/conforto/aventura/sustentabilidade atualizando ao vivo, resumo final com confete e viagem salva no histórico (pronta pro Perfil)
 
 ## Próximas etapas (aguardando aprovação)
 
 - [ ] `/explorar` — grid filtrável por categoria, busca instantânea
-- [ ] `/planejador` — fluxo passo a passo (destino → voo → hotel → transporte → atrações → restaurantes → resumo) com barras de orçamento/conforto/aventura atualizando ao vivo
 - [ ] `/perfil` — viagens criadas, conquistas, nível, estatísticas
 - [ ] `/ranking` — leaderboard por categoria (economia, luxo, países visitados, pontuação)
 - [ ] `/favoritos` — destinos, hotéis, restaurantes e passeios salvos
-- [ ] Card de compartilhamento ao final de uma viagem
+- [ ] Card de compartilhamento visual (imagem) ao final de uma viagem
 - [ ] Animações de simulação (passagem encontrada, promoção, mudança de clima)
 
 ## Integrações futuras (estrutura já preparada em `lib/services`)

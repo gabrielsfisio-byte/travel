@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import type {
   Attraction,
   Airline,
+  CompletedTrip,
   Destination,
   Hotel,
   Restaurant,
@@ -17,6 +18,7 @@ interface TravelState {
   budget: number;
   trip: TripSelection;
   favorites: { destinations: string[]; hotels: string[]; restaurants: string[]; attractions: string[] };
+  completedTrips: CompletedTrip[];
 
   setDestination: (d: Destination) => void;
   setAirline: (a: Airline) => void;
@@ -26,6 +28,7 @@ interface TravelState {
   toggleAttraction: (a: Attraction) => void;
   toggleRestaurant: (r: Restaurant) => void;
   resetTrip: () => void;
+  addCompletedTrip: (trip: CompletedTrip) => void;
 
   toggleFavoriteDestination: (id: string) => void;
   toggleFavoriteHotel: (id: string) => void;
@@ -45,10 +48,11 @@ const emptyTrip: TripSelection = {
 
 export const useTravelStore = create<TravelState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       budget: STARTING_BUDGET,
       trip: emptyTrip,
       favorites: { destinations: [], hotels: [], restaurants: [], attractions: [] },
+      completedTrips: [],
 
       setDestination: (d) => set((s) => ({ trip: { ...s.trip, destination: d } })),
       setAirline: (a) => set((s) => ({ trip: { ...s.trip, airline: a } })),
@@ -83,6 +87,8 @@ export const useTravelStore = create<TravelState>()(
         }),
 
       resetTrip: () => set({ trip: emptyTrip }),
+
+      addCompletedTrip: (trip) => set((s) => ({ completedTrips: [trip, ...s.completedTrips] })),
 
       toggleFavoriteDestination: (id) =>
         set((s) => ({
