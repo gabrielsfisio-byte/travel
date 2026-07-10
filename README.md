@@ -72,10 +72,10 @@ micro animações via Framer Motion.
 - [x] Store global (Zustand) já preparado com o cálculo de `TripScore` (orçamento, conforto, aventura, sustentabilidade, pontuação geral) para a próxima etapa (Planejador)
 - [x] `/planejador` — fluxo passo a passo completo (destino → voo → hotel → transporte → atrações → restaurantes → resumo) com orçamento/conforto/aventura/sustentabilidade atualizando ao vivo, resumo final com confete e viagem salva no histórico (pronta pro Perfil)
 - [x] `/perfil` — nível calculado por pontos acumulados, conquistas desbloqueadas dinamicamente com base nas viagens reais do usuário, estatísticas (viagens, países, favoritos) e histórico de viagens criadas
+- [x] `/explorar` — busca instantânea (cidade, país ou categoria) + filtro por múltiplas categorias, reaproveitando os cards da Home
 
 ## Próximas etapas (aguardando aprovação)
 
-- [ ] `/explorar` — grid filtrável por categoria, busca instantânea
 - [ ] `/ranking` — leaderboard por categoria (economia, luxo, países visitados, pontuação)
 - [ ] `/favoritos` — destinos, hotéis, restaurantes e passeios salvos
 - [ ] Card de compartilhamento visual (imagem) ao final de uma viagem
