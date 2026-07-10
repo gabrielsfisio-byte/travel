@@ -74,8 +74,12 @@ export default function PlanejadorPage() {
       nights: trip.nights,
       hotel: trip.hotel,
       totalCost: score.totalCost,
+      savings: score.savings,
       score: score.overallScore,
       level: score.overallScore >= 85 ? "Lendária" : score.overallScore >= 65 ? "Incrível" : score.overallScore >= 45 ? "Muito boa" : "Iniciante",
+      attractionsCount: trip.attractions.length,
+      restaurantsCount: trip.restaurants.length,
+      hadPromo: !!trip.destination.promo,
       createdAt: new Date().toISOString(),
     };
     addCompletedTrip(completed);

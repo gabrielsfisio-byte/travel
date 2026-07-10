@@ -112,7 +112,11 @@ export interface CompletedTrip {
   nights: number;
   hotel: Hotel;
   totalCost: number;
+  savings: number;
   score: number;
   level: string;
+  attractionsCount: number;
+  restaurantsCount: number;
+  hadPromo: boolean;
   createdAt: string;
 }
