@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Award, Check, Share2, Sparkles } from "lucide-react";
+import { Award, Check, Crown, FileDown, Sparkles } from "lucide-react";
+import Link from "next/link";
 import type { TripSelection } from "@/types";
 import { formatBRL } from "@/utils/cn";
 import { computeTripScore } from "@/store/travel-store";
+import { useAuth } from "@/hooks/use-auth";
 
 function levelFromScore(score: number) {
   if (score >= 85) return "Lendária";
@@ -24,6 +26,7 @@ export function TripSummaryCard({
   budget: number;
   onFinish: () => void;
 }) {
+  const { isPremium } = useAuth();
   const score = computeTripScore(trip, budget);
   const level = levelFromScore(score.overallScore);
   const [finished, setFinished] = useState(false);
@@ -39,12 +42,17 @@ export function TripSummaryCard({
     onFinish();
   }
 
+  function handleExportPdf() {
+    window.print();
+  }
+
   if (!trip.destination) return null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
+      id="trip-summary-print"
       className="rounded-2xl border border-border bg-card overflow-hidden"
     >
       <div className="relative h-40 w-full bg-gradient-to-br from-primary/25 via-secondary/20 to-accent/20 flex items-end p-5">
@@ -79,7 +87,7 @@ export function TripSummaryCard({
         </div>
       </div>
 
-      <div className="p-5 flex flex-col sm:flex-row gap-3">
+      <div className="p-5 flex flex-col sm:flex-row gap-3 print:hidden">
         {!finished ? (
           <button
             onClick={handleFinish}
@@ -94,14 +102,25 @@ export function TripSummaryCard({
             Viagem salva no seu perfil!
           </div>
         )}
-        <button
-          disabled={!finished}
-          onClick={() => alert("Card de compartilhamento fictício copiado! (funcionalidade de imagem chega na próxima etapa)")}
-          className="flex items-center justify-center gap-2 rounded-xl border border-border font-semibold py-3 px-5 text-sm hover:bg-card-hover transition disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Share2 className="size-4" />
-          Compartilhar
-        </button>
+
+        {isPremium ? (
+          <button
+            disabled={!finished}
+            onClick={handleExportPdf}
+            className="flex items-center justify-center gap-2 rounded-xl border border-border font-semibold py-3 px-5 text-sm hover:bg-card-hover transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <FileDown className="size-4" />
+            Exportar PDF
+          </button>
+        ) : (
+          <Link
+            href="/premium"
+            className="flex items-center justify-center gap-2 rounded-xl border border-accent/40 text-accent font-semibold py-3 px-5 text-sm hover:bg-accent/10 transition"
+          >
+            <Crown className="size-4" />
+            PDF é Premium
+          </Link>
+        )}
       </div>
     </motion.div>
   );

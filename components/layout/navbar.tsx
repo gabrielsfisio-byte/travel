@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Compass, Heart, Map, Menu, Plane, Trophy, User, Wallet, X } from "lucide-react";
+import { Compass, Crown, Heart, Map, Menu, Plane, Trophy, User, Wallet, X } from "lucide-react";
 import { useTravelStore } from "@/store/travel-store";
+import { useAuth } from "@/hooks/use-auth";
 import { formatBRL } from "@/utils/cn";
 
 const NAV_LINKS = [
@@ -18,6 +19,7 @@ const NAV_LINKS = [
 export function Navbar() {
   const budget = useTravelStore((s) => s.budget);
   const [open, setOpen] = useState(false);
+  const { user, isPremium, loading } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
@@ -49,6 +51,30 @@ export function Navbar() {
             <Wallet className="size-4 text-accent" />
             <span className="text-sm font-semibold tabular-nums">{formatBRL(budget)}</span>
           </div>
+
+          {!loading && (
+            <>
+              {isPremium ? (
+                <span className="hidden sm:flex items-center gap-1 text-xs font-bold text-accent bg-accent/15 rounded-full px-3 py-1.5">
+                  <Crown className="size-3.5" /> Premium
+                </span>
+              ) : (
+                <Link
+                  href="/premium"
+                  className="hidden sm:flex items-center gap-1 text-xs font-bold text-background bg-accent rounded-full px-3 py-1.5 hover:brightness-110 transition"
+                >
+                  <Crown className="size-3.5" /> Premium
+                </Link>
+              )}
+              <Link
+                href={user ? "/conta" : "/login"}
+                className="hidden sm:flex items-center justify-center size-9 rounded-full border border-border hover:bg-card transition"
+              >
+                <User className="size-4" />
+              </Link>
+            </>
+          )}
+
           <button
             onClick={() => setOpen((v) => !v)}
             className="lg:hidden flex items-center justify-center size-9 rounded-lg border border-border"
@@ -60,10 +86,26 @@ export function Navbar() {
 
       {open && (
         <nav className="lg:hidden border-t border-border px-4 py-3 flex flex-col gap-1 bg-background">
-          <div className="sm:hidden flex items-center gap-2 rounded-full glass px-3 py-1.5 w-fit mb-2">
-            <Wallet className="size-4 text-accent" />
-            <span className="text-sm font-semibold tabular-nums">{formatBRL(budget)}</span>
+          <div className="sm:hidden flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2 rounded-full glass px-3 py-1.5 w-fit">
+              <Wallet className="size-4 text-accent" />
+              <span className="text-sm font-semibold tabular-nums">{formatBRL(budget)}</span>
+            </div>
+            <Link
+              href={user ? "/conta" : "/login"}
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center size-9 rounded-full border border-border"
+            >
+              <User className="size-4" />
+            </Link>
           </div>
+          <Link
+            href="/premium"
+            onClick={() => setOpen(false)}
+            className="sm:hidden flex items-center gap-1.5 text-xs font-bold text-background bg-accent rounded-full px-3 py-2 w-fit mb-2"
+          >
+            <Crown className="size-3.5" /> {isPremium ? "Você é Premium" : "Assinar Premium"}
+          </Link>
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}

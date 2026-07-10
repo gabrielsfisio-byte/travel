@@ -7,6 +7,8 @@ import { useTravelStore } from "@/store/travel-store";
 import { computeAchievements, computeLevel, countriesVisited } from "@/lib/achievements";
 import { AchievementBadge } from "@/components/profile/achievement-badge";
 import { TripHistoryCard } from "@/components/profile/trip-history-card";
+import { PremiumGate } from "@/components/premium-gate";
+import { useAuth } from "@/hooks/use-auth";
 import { formatBRL } from "@/utils/cn";
 
 function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | number }) {
@@ -26,6 +28,7 @@ function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label
 export default function PerfilPage() {
   const completedTrips = useTravelStore((s) => s.completedTrips);
   const favorites = useTravelStore((s) => s.favorites);
+  const { isPremium } = useAuth();
 
   const achievements = computeAchievements(completedTrips);
   const level = computeLevel(completedTrips);
@@ -34,6 +37,12 @@ export default function PerfilPage() {
 
   const totalFavorites =
     favorites.destinations.length + favorites.hotels.length + favorites.restaurants.length + favorites.attractions.length;
+
+  const totalSpent = completedTrips.reduce((a, t) => a + t.totalCost, 0);
+  const avgScore = completedTrips.length
+    ? Math.round(completedTrips.reduce((a, t) => a + t.score, 0) / completedTrips.length)
+    : 0;
+  const totalSaved = completedTrips.reduce((a, t) => a + t.savings, 0);
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10 flex flex-col gap-10">
@@ -78,6 +87,30 @@ export default function PerfilPage() {
           <StatCard icon={Trophy} label="Conquistas" value={`${unlockedCount}/${achievements.length}`} />
           <StatCard icon={Heart} label="Favoritos salvos" value={totalFavorites} />
         </div>
+      </div>
+
+      {/* Advanced stats (Premium) */}
+      <div>
+        <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
+          <TrendingUp className="size-5 text-accent" />
+          Estatísticas avançadas
+        </h2>
+        <PremiumGate isPremium={isPremium} title="Estatísticas avançadas são exclusivas para assinantes Premium">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs text-muted mb-1">Total gasto (fictício)</p>
+              <p className="font-display font-bold text-lg">{formatBRL(totalSpent)}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs text-muted mb-1">Total economizado</p>
+              <p className="font-display font-bold text-lg text-primary">{formatBRL(totalSaved)}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs text-muted mb-1">Pontuação média</p>
+              <p className="font-display font-bold text-lg text-accent">{avgScore}/100</p>
+            </div>
+          </div>
+        </PremiumGate>
       </div>
 
       {/* Achievements */}

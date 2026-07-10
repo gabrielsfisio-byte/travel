@@ -75,15 +75,52 @@ micro animações via Framer Motion.
 - [x] `/explorar` — busca instantânea (cidade, país ou categoria) + filtro por múltiplas categorias, reaproveitando os cards da Home
 - [x] `/favoritos` — destinos salvos com ❤️, com estado vazio guiando para `/explorar`
 - [x] `/ranking` — 4 categorias (pontuação, economia, luxo, países visitados), com o próprio usuário aparecendo na lista dinamicamente assim que finaliza uma viagem
+- [x] **Monetização real**: login/cadastro (Supabase Auth), assinatura Premium R$ 29,90/mês via Stripe Checkout, portal de autogerenciamento (cancelar/trocar cartão), e dois recursos travados atrás do Premium (exportar PDF do roteiro, estatísticas avançadas no Perfil)
 
-Todos os links do menu principal já funcionam — o MVP completo descrito no prompt inicial está no ar.
+Todos os links do menu principal já funcionam — o MVP completo descrito no prompt inicial está no ar, com monetização real.
 
 ## Próximas melhorias possíveis (não solicitadas ainda)
 
 - [ ] Card de compartilhamento visual (imagem) ao final de uma viagem
 - [ ] Animações de simulação (passagem encontrada, promoção, mudança de clima)
 - [ ] Favoritar hotéis/restaurantes/atrações também (hoje só destinos têm UI de favorito)
-- [ ] Autenticação real (hoje tudo fica salvo por navegador via localStorage)
+
+## Configurando pagamentos e login (obrigatório para a monetização funcionar)
+
+Copie `.env.local.example` para `.env.local` (localmente) e configure as mesmas variáveis em
+**Vercel → seu projeto → Settings → Environment Variables** (produção). Veja no próprio arquivo
+onde encontrar cada chave.
+
+### 1. Supabase (login + banco de dados)
+
+1. No painel do seu projeto Supabase, vá em **SQL Editor** → **New query**.
+2. Cole todo o conteúdo do arquivo `supabase/schema.sql` deste projeto e clique em **Run**.
+   Isso cria a tabela `profiles` (guarda quem é assinante) e configura tudo automaticamente
+   para novos usuários que se cadastrarem.
+3. Em **Project Settings → API**, copie a **Project URL** e a **anon public key** para
+   `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+4. Copie também a **service_role secret** (mesma tela, mais abaixo) para
+   `SUPABASE_SERVICE_ROLE_KEY` — **essa chave é sensível, nunca a exponha publicamente**.
+
+### 2. Stripe (pagamento)
+
+1. No Dashboard do Stripe, vá em **Product catalog** → crie um produto chamado "Premium",
+   com preço recorrente mensal de R$ 29,90 → copie o **Price ID** (começa com `price_`) para
+   `STRIPE_PRICE_ID`.
+2. Em **Developers → API keys**, copie a **Secret key** para `STRIPE_SECRET_KEY`.
+3. Em **Developers → Webhooks**, crie um endpoint apontando para
+   `https://SEU-SITE.vercel.app/api/stripe/webhook`, com os eventos:
+   `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
+   Copie o **Signing secret** (começa com `whsec_`) para `STRIPE_WEBHOOK_SECRET`.
+4. Ative o **Customer Portal** em **Settings → Billing → Customer portal** (permite o usuário
+   cancelar/gerenciar a assinatura sozinho).
+
+### 3. Site
+
+Defina `NEXT_PUBLIC_SITE_URL` como a URL real do seu site (ex: `https://travel-vert-two.vercel.app`).
+
+Depois de configurar tudo na Vercel, force um novo deploy (qualquer commit novo já dispara,
+ou use "Redeploy" no dashboard da Vercel) para as variáveis entrarem em vigor.
 
 ## Integrações futuras (estrutura já preparada em `lib/services`)
 

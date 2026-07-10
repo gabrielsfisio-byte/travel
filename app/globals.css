@@ -57,3 +57,19 @@ body {
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #trip-summary-print,
+  #trip-summary-print * {
+    visibility: visible;
+  }
+  #trip-summary-print {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
