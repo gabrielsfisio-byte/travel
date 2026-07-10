@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
@@ -14,6 +14,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { DESTINATIONS } from "@/lib/data/destinations";
+import { getUnlockedSecretDestinations } from "@/lib/secret-destinations";
 import {
   getAirlines,
   getAttractions,
@@ -29,9 +30,11 @@ import { OptionCard } from "@/components/planner/option-card";
 import { MetaChip } from "@/components/planner/meta-chip";
 import { TripSummaryCard } from "@/components/planner/trip-summary-card";
 import type { CompletedTrip } from "@/types";
+import { formatBRL } from "@/utils/cn";
 
 export default function PlanejadorPage() {
   const budget = useTravelStore((s) => s.budget);
+  const setBudget = useTravelStore((s) => s.setBudget);
   const trip = useTravelStore((s) => s.trip);
   const setDestination = useTravelStore((s) => s.setDestination);
   const setAirline = useTravelStore((s) => s.setAirline);
@@ -44,8 +47,30 @@ export default function PlanejadorPage() {
   const setFullTrip = useTravelStore((s) => s.setFullTrip);
   const addCompletedTrip = useTravelStore((s) => s.addCompletedTrip);
 
+  const completedTrips = useTravelStore((s) => s.completedTrips);
   const [step, setStep] = useState(0);
   const [rolling, setRolling] = useState(false);
+  const unlockedSecrets = useMemo(() => getUnlockedSecretDestinations(completedTrips), [completedTrips]);
+  const selectableDestinations = useMemo(() => [...DESTINATIONS, ...unlockedSecrets], [unlockedSecrets]);
+  const [challengeBanner, setChallengeBanner] = useState<{ city: string; budget: number } | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const destId = params.get("desafioDestino");
+    const orcamento = params.get("desafioOrcamento");
+    if (destId && orcamento) {
+      const dest = DESTINATIONS.find((d) => d.id === destId);
+      const amount = Number(orcamento);
+      if (dest && amount > 0) {
+        setDestination(dest);
+        setBudget(amount);
+        setChallengeBanner({ city: dest.city, budget: amount });
+        setStep(1);
+        window.history.replaceState(null, "", "/planejador");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const score = computeTripScore(trip, budget);
 
@@ -115,6 +140,12 @@ export default function PlanejadorPage() {
       />
 
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 flex flex-col gap-6">
+        {challengeBanner && (
+          <div className="rounded-xl border border-secondary/40 bg-secondary/10 px-4 py-3 text-sm font-medium text-secondary flex items-center gap-2">
+            ⚔️ Desafio ativo: monte a melhor viagem pra {challengeBanner.city} com {formatBRL(challengeBanner.budget)}!
+          </div>
+        )}
+
         <div className="flex items-center justify-between gap-4">
           <StepIndicator current={step} />
           <button
@@ -145,7 +176,8 @@ export default function PlanejadorPage() {
               </motion.button>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {DESTINATIONS.map((d) => {
+                {selectableDestinations.map((d) => {
+                  const isSecret = d.id.startsWith("secret-");
                   const selected = trip.destination?.id === d.id;
                   return (
                     <button
@@ -155,11 +187,20 @@ export default function PlanejadorPage() {
                         setStep(1);
                       }}
                       className={`relative rounded-xl overflow-hidden border h-28 sm:h-32 group ${
-                        selected ? "border-primary ring-2 ring-primary/40" : "border-border"
+                        selected
+                          ? "border-primary ring-2 ring-primary/40"
+                          : isSecret
+                            ? "border-accent ring-1 ring-accent/50"
+                            : "border-border"
                       }`}
                     >
                       <Image src={d.image} alt={d.city} fill sizes="200px" className="object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/10" />
+                      {isSecret && (
+                        <span className="absolute top-1.5 left-1.5 text-[9px] font-bold text-background bg-accent rounded-full px-1.5 py-0.5">
+                          ✨ SECRETO
+                        </span>
+                      )}
                       <div className="absolute bottom-1.5 left-2 right-2 text-left">
                         <p className="text-xs font-bold text-white leading-tight">{d.city}</p>
                         <p className="text-[10px] text-white/70 flex items-center gap-0.5">

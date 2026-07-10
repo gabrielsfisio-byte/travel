@@ -19,6 +19,10 @@ interface TravelState {
   trip: TripSelection;
   favorites: { destinations: string[]; hotels: string[]; restaurants: string[]; attractions: string[] };
   completedTrips: CompletedTrip[];
+  profileTheme: string;
+
+  setProfileTheme: (theme: string) => void;
+  setBudget: (amount: number) => void;
 
   setDestination: (d: Destination) => void;
   setAirline: (a: Airline) => void;
@@ -54,6 +58,10 @@ export const useTravelStore = create<TravelState>()(
       trip: emptyTrip,
       favorites: { destinations: [], hotels: [], restaurants: [], attractions: [] },
       completedTrips: [],
+      profileTheme: "verde",
+
+      setProfileTheme: (theme) => set({ profileTheme: theme }),
+      setBudget: (amount) => set({ budget: Math.max(0, amount) }),
 
       setDestination: (d) => set((s) => ({ trip: { ...s.trip, destination: d } })),
       setAirline: (a) => set((s) => ({ trip: { ...s.trip, airline: a } })),

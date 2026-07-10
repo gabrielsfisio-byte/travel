@@ -2,14 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Compass, Flag, Heart, MapPin, Sparkles, TrendingUp, Trophy, User, Wand2 } from "lucide-react";
+import { Compass, Flag, Heart, MapPin, Sparkles, Swords, TrendingUp, Trophy } from "lucide-react";
 import { useTravelStore } from "@/store/travel-store";
 import { computeAchievements, computeLevel, computeWrappedStats, countriesVisited } from "@/lib/achievements";
+import { getCronica } from "@/lib/cronicas";
 import { AchievementBadge } from "@/components/profile/achievement-badge";
 import { CountryCollection } from "@/components/profile/country-collection";
 import { TripHistoryCard } from "@/components/profile/trip-history-card";
 import { WrappedModal } from "@/components/profile/wrapped-modal";
+import { PassportHeader } from "@/components/profile/passport-header";
+import { SecretDestinationsGallery } from "@/components/profile/secret-destinations-gallery";
+import { AgencyGallery } from "@/components/profile/agency-gallery";
+import { CreateChallengeModal } from "@/components/challenge/create-challenge-modal";
 import { PremiumGate } from "@/components/premium-gate";
 import { useAuth } from "@/hooks/use-auth";
 import { formatBRL } from "@/utils/cn";
@@ -31,6 +35,8 @@ function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label
 export default function PerfilPage() {
   const completedTrips = useTravelStore((s) => s.completedTrips);
   const favorites = useTravelStore((s) => s.favorites);
+  const profileTheme = useTravelStore((s) => s.profileTheme);
+  const setProfileTheme = useTravelStore((s) => s.setProfileTheme);
   const { isPremium } = useAuth();
 
   const achievements = computeAchievements(completedTrips);
@@ -48,46 +54,25 @@ export default function PerfilPage() {
   const totalSaved = completedTrips.reduce((a, t) => a + t.savings, 0);
   const wrappedStats = computeWrappedStats(completedTrips);
   const [showWrapped, setShowWrapped] = useState(false);
+  const [showChallenge, setShowChallenge] = useState(false);
+
+  // Cronicas: countries visited 3+ times unlock a flavor text.
+  const countryCounts = new Map<string, number>();
+  completedTrips.forEach((t) => countryCounts.set(t.destination.country, (countryCounts.get(t.destination.country) ?? 0) + 1));
+  const cronicas = Array.from(countryCounts.entries())
+    .map(([country, count]) => ({ country, text: getCronica(country, count) }))
+    .filter((c) => c.text);
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10 flex flex-col gap-10">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-primary/10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-5"
-      >
-        <span className="flex items-center justify-center size-16 rounded-2xl bg-primary/15 text-primary shrink-0">
-          <User className="size-8" />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-muted mb-1">Perfil fictício</p>
-          <h1 className="font-display text-2xl font-extrabold">Viajante Anônimo</h1>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs font-bold text-white bg-primary rounded-full px-3 py-1">Nível {level.name}</span>
-            <span className="text-xs text-muted">{level.points} pts</span>
-          </div>
-          {level.nextLevelPoints !== null && (
-            <div className="mt-3 max-w-xs">
-              <div className="h-1.5 rounded-full bg-border overflow-hidden">
-                <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${level.progressPct}%` }} />
-              </div>
-              <p className="text-[11px] text-muted mt-1">
-                Faltam {Math.max(0, level.nextLevelPoints - level.points)} pts para o próximo nível
-              </p>
-            </div>
-          )}
-        </div>
-        {completedTrips.length > 0 && (
-          <button
-            onClick={() => setShowWrapped(true)}
-            className="shrink-0 flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent via-primary to-secondary text-white font-bold px-4 py-2.5 text-sm hover:brightness-110 transition"
-          >
-            <Wand2 className="size-4" />
-            Ver meu Wrapped
-          </button>
-        )}
-      </motion.div>
+      <PassportHeader
+        level={level}
+        countriesCount={countries.length}
+        theme={profileTheme}
+        onThemeChange={setProfileTheme}
+        onOpenWrapped={() => setShowWrapped(true)}
+        hasTrips={completedTrips.length > 0}
+      />
 
       {/* Stats */}
       <div>
@@ -103,6 +88,25 @@ export default function PerfilPage() {
         </div>
       </div>
 
+      {/* Desafiar amigo */}
+      <div className="rounded-2xl border border-secondary/30 bg-secondary/5 p-5 flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center justify-center size-11 rounded-xl bg-secondary/15 text-secondary shrink-0">
+            <Swords className="size-5" />
+          </span>
+          <div>
+            <p className="font-display font-bold text-sm">Desafie um amigo</p>
+            <p className="text-xs text-muted">Envie um destino e orçamento fixo — quem monta a melhor viagem?</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowChallenge(true)}
+          className="rounded-xl bg-secondary text-white font-semibold px-4 py-2.5 text-sm hover:brightness-110 transition shrink-0"
+        >
+          Criar desafio
+        </button>
+      </div>
+
       {/* Country Collection */}
       <div>
         <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
@@ -110,6 +114,42 @@ export default function PerfilPage() {
           Coleção de países
         </h2>
         <CountryCollection visitedCountries={countries} />
+      </div>
+
+      {/* Secret destinations */}
+      <div>
+        <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
+          <Sparkles className="size-5 text-accent" />
+          Destinos secretos
+        </h2>
+        <SecretDestinationsGallery trips={completedTrips} />
+      </div>
+
+      {/* Cronicas */}
+      {cronicas.length > 0 && (
+        <div>
+          <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
+            <Sparkles className="size-5 text-accent" />
+            Crônicas de viagem
+          </h2>
+          <div className="flex flex-col gap-3">
+            {cronicas.map((c) => (
+              <div key={c.country} className="rounded-xl border border-accent/30 bg-accent/5 p-4">
+                <p className="text-xs font-bold text-accent mb-1">{c.country}</p>
+                <p className="text-sm">{c.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Agencies */}
+      <div>
+        <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
+          <Trophy className="size-5 text-primary" />
+          Agências desbloqueadas
+        </h2>
+        <AgencyGallery achievements={achievements} />
       </div>
 
       {/* Advanced stats (Premium) */}
@@ -172,6 +212,7 @@ export default function PerfilPage() {
       </div>
 
       {showWrapped && <WrappedModal stats={wrappedStats} onClose={() => setShowWrapped(false)} />}
+      {showChallenge && <CreateChallengeModal onClose={() => setShowChallenge(false)} />}
     </div>
   );
 }
