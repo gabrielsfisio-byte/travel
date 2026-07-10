@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { Award, Check, Crown, FileDown, Sparkles } from "lucide-react";
+import { Award, Check, Crown, FileDown, Share2, Sparkles } from "lucide-react";
 import Link from "next/link";
-import type { TripSelection } from "@/types";
+import type { CompletedTrip, TripSelection } from "@/types";
 import { formatBRL } from "@/utils/cn";
 import { computeTripScore } from "@/store/travel-store";
 import { useAuth } from "@/hooks/use-auth";
+import { ShareModal } from "@/components/share/share-modal";
 
 function levelFromScore(score: number) {
   if (score >= 85) return "Lendária";
@@ -30,6 +31,7 @@ export function TripSummaryCard({
   const score = computeTripScore(trip, budget);
   const level = levelFromScore(score.overallScore);
   const [finished, setFinished] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   function handleFinish() {
     confetti({
@@ -46,7 +48,22 @@ export function TripSummaryCard({
     window.print();
   }
 
-  if (!trip.destination) return null;
+  if (!trip.destination || !trip.hotel) return null;
+
+  const shareableTrip: CompletedTrip = {
+    id: "preview",
+    destination: trip.destination,
+    nights: trip.nights,
+    hotel: trip.hotel,
+    totalCost: score.totalCost,
+    savings: score.savings,
+    score: score.overallScore,
+    level,
+    attractionsCount: trip.attractions.length,
+    restaurantsCount: trip.restaurants.length,
+    hadPromo: !!trip.destination.promo,
+    createdAt: new Date().toISOString(),
+  };
 
   return (
     <motion.div
@@ -103,6 +120,15 @@ export function TripSummaryCard({
           </div>
         )}
 
+        <button
+          disabled={!finished}
+          onClick={() => setShowShare(true)}
+          className="flex items-center justify-center gap-2 rounded-xl border border-accent/40 text-accent font-semibold py-3 px-5 text-sm hover:bg-accent/10 transition disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <Share2 className="size-4" />
+          Compartilhar
+        </button>
+
         {isPremium ? (
           <button
             disabled={!finished}
@@ -115,13 +141,15 @@ export function TripSummaryCard({
         ) : (
           <Link
             href="/premium"
-            className="flex items-center justify-center gap-2 rounded-xl border border-accent/40 text-accent font-semibold py-3 px-5 text-sm hover:bg-accent/10 transition"
+            className="flex items-center justify-center gap-2 rounded-xl border border-border text-muted font-semibold py-3 px-5 text-sm hover:bg-card-hover transition"
           >
-            <Crown className="size-4" />
+            <Crown className="size-4 text-accent" />
             PDF é Premium
           </Link>
         )}
       </div>
+
+      {showShare && <ShareModal trip={shareableTrip} onClose={() => setShowShare(false)} />}
     </motion.div>
   );
 }

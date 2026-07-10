@@ -3,6 +3,7 @@ import { Hero } from "@/components/home/hero";
 import { SectionHeader } from "@/components/home/section-header";
 import { DestinationCard } from "@/components/home/destination-card";
 import { PromoStrip } from "@/components/home/promo-strip";
+import { DailyChallengeSection } from "@/components/home/daily-challenge-section";
 import { DESTINATIONS } from "@/lib/data/destinations";
 
 export default function Home() {
@@ -15,6 +16,7 @@ export default function Home() {
       <Hero />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-20 flex flex-col gap-14">
+        <DailyChallengeSection />
         <PromoStrip destinations={DESTINATIONS} />
 
         <section>

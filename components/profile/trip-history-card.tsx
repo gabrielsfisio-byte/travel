@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { Award, Moon } from "lucide-react";
+import { Award, Moon, Share2 } from "lucide-react";
 import type { CompletedTrip } from "@/types";
 import { formatBRL } from "@/utils/cn";
+import { ShareModal } from "@/components/share/share-modal";
 
 export function TripHistoryCard({ trip }: { trip: CompletedTrip }) {
+  const [showShare, setShowShare] = useState(false);
+
   return (
     <div className="flex gap-3 rounded-xl border border-border bg-card p-3">
       <div className="relative size-16 rounded-lg overflow-hidden shrink-0">
@@ -26,9 +30,16 @@ export function TripHistoryCard({ trip }: { trip: CompletedTrip }) {
         </p>
         <div className="flex items-center justify-between mt-1.5">
           <span className="text-[11px] text-muted">{trip.level}</span>
-          <span className="text-xs font-bold text-primary">{formatBRL(trip.totalCost)}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-primary">{formatBRL(trip.totalCost)}</span>
+            <button onClick={() => setShowShare(true)} className="text-muted hover:text-accent">
+              <Share2 className="size-3.5" />
+            </button>
+          </div>
         </div>
       </div>
+
+      {showShare && <ShareModal trip={trip} onClose={() => setShowShare(false)} />}
     </div>
   );
 }

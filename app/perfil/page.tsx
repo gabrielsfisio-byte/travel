@@ -1,13 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Compass, Flag, Heart, MapPin, Sparkles, TrendingUp, Trophy, User } from "lucide-react";
+import { Compass, Flag, Heart, MapPin, Sparkles, TrendingUp, Trophy, User, Wand2 } from "lucide-react";
 import { useTravelStore } from "@/store/travel-store";
-import { computeAchievements, computeLevel, countriesVisited } from "@/lib/achievements";
+import { computeAchievements, computeLevel, computeWrappedStats, countriesVisited } from "@/lib/achievements";
 import { AchievementBadge } from "@/components/profile/achievement-badge";
 import { CountryCollection } from "@/components/profile/country-collection";
 import { TripHistoryCard } from "@/components/profile/trip-history-card";
+import { WrappedModal } from "@/components/profile/wrapped-modal";
 import { PremiumGate } from "@/components/premium-gate";
 import { useAuth } from "@/hooks/use-auth";
 import { formatBRL } from "@/utils/cn";
@@ -44,6 +46,8 @@ export default function PerfilPage() {
     ? Math.round(completedTrips.reduce((a, t) => a + t.score, 0) / completedTrips.length)
     : 0;
   const totalSaved = completedTrips.reduce((a, t) => a + t.savings, 0);
+  const wrappedStats = computeWrappedStats(completedTrips);
+  const [showWrapped, setShowWrapped] = useState(false);
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10 flex flex-col gap-10">
@@ -74,6 +78,15 @@ export default function PerfilPage() {
             </div>
           )}
         </div>
+        {completedTrips.length > 0 && (
+          <button
+            onClick={() => setShowWrapped(true)}
+            className="shrink-0 flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent via-primary to-secondary text-white font-bold px-4 py-2.5 text-sm hover:brightness-110 transition"
+          >
+            <Wand2 className="size-4" />
+            Ver meu Wrapped
+          </button>
+        )}
       </motion.div>
 
       {/* Stats */}
@@ -157,6 +170,8 @@ export default function PerfilPage() {
           </div>
         )}
       </div>
+
+      {showWrapped && <WrappedModal stats={wrappedStats} onClose={() => setShowWrapped(false)} />}
     </div>
   );
 }

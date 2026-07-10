@@ -1,6 +1,6 @@
 import type { Achievement, CompletedTrip } from "@/types";
 
-const CONTINENT_BY_COUNTRY: Record<string, string> = {
+export const CONTINENT_BY_COUNTRY: Record<string, string> = {
   Brasil: "América",
   Argentina: "América",
   "Estados Unidos": "América",
@@ -99,6 +99,48 @@ export function computeAchievements(trips: CompletedTrip[]): Achievement[] {
     icon: def.icon,
     unlocked: def.check(trips),
   }));
+}
+
+export interface WrappedStats {
+  totalTrips: number;
+  countriesCount: number;
+  totalAttractions: number;
+  totalRestaurants: number;
+  totalBudgetUsed: number;
+  favoriteContinent: string | null;
+  mostChosenCity: string | null;
+  bestScore: number;
+}
+
+function mostFrequent<T>(items: T[]): T | null {
+  if (items.length === 0) return null;
+  const counts = new Map<T, number>();
+  items.forEach((item) => counts.set(item, (counts.get(item) ?? 0) + 1));
+  let best: T | null = null;
+  let bestCount = 0;
+  counts.forEach((count, item) => {
+    if (count > bestCount) {
+      best = item;
+      bestCount = count;
+    }
+  });
+  return best;
+}
+
+export function computeWrappedStats(trips: CompletedTrip[]): WrappedStats {
+  const continents = trips.map((t) => CONTINENT_BY_COUNTRY[t.destination.country]).filter(Boolean) as string[];
+  const cities = trips.map((t) => t.destination.city);
+
+  return {
+    totalTrips: trips.length,
+    countriesCount: countriesVisited(trips).length,
+    totalAttractions: trips.reduce((a, t) => a + t.attractionsCount, 0),
+    totalRestaurants: trips.reduce((a, t) => a + t.restaurantsCount, 0),
+    totalBudgetUsed: trips.reduce((a, t) => a + t.totalCost, 0),
+    favoriteContinent: mostFrequent(continents),
+    mostChosenCity: mostFrequent(cities),
+    bestScore: trips.reduce((max, t) => Math.max(max, t.score), 0),
+  };
 }
 
 export interface LevelInfo {
