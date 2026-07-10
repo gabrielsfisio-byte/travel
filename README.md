@@ -73,13 +73,17 @@ micro animações via Framer Motion.
 - [x] `/planejador` — fluxo passo a passo completo (destino → voo → hotel → transporte → atrações → restaurantes → resumo) com orçamento/conforto/aventura/sustentabilidade atualizando ao vivo, resumo final com confete e viagem salva no histórico (pronta pro Perfil)
 - [x] `/perfil` — nível calculado por pontos acumulados, conquistas desbloqueadas dinamicamente com base nas viagens reais do usuário, estatísticas (viagens, países, favoritos) e histórico de viagens criadas
 - [x] `/explorar` — busca instantânea (cidade, país ou categoria) + filtro por múltiplas categorias, reaproveitando os cards da Home
+- [x] `/favoritos` — destinos salvos com ❤️, com estado vazio guiando para `/explorar`
+- [x] `/ranking` — 4 categorias (pontuação, economia, luxo, países visitados), com o próprio usuário aparecendo na lista dinamicamente assim que finaliza uma viagem
 
-## Próximas etapas (aguardando aprovação)
+Todos os links do menu principal já funcionam — o MVP completo descrito no prompt inicial está no ar.
 
-- [ ] `/ranking` — leaderboard por categoria (economia, luxo, países visitados, pontuação)
-- [ ] `/favoritos` — destinos, hotéis, restaurantes e passeios salvos
+## Próximas melhorias possíveis (não solicitadas ainda)
+
 - [ ] Card de compartilhamento visual (imagem) ao final de uma viagem
 - [ ] Animações de simulação (passagem encontrada, promoção, mudança de clima)
+- [ ] Favoritar hotéis/restaurantes/atrações também (hoje só destinos têm UI de favorito)
+- [ ] Autenticação real (hoje tudo fica salvo por navegador via localStorage)
 
 ## Integrações futuras (estrutura já preparada em `lib/services`)
 
