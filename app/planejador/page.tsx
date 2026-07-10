@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Dice5,
   MapPin,
   Minus,
   Plus,
@@ -20,6 +21,7 @@ import {
   getRestaurants,
   getTransportOptions,
 } from "@/lib/data/travel-options";
+import { generateSurpriseTrip } from "@/lib/surprise-trip";
 import { useTravelStore, computeTripScore } from "@/store/travel-store";
 import { LiveStatsBar } from "@/components/planner/live-stats-bar";
 import { StepIndicator, PLANNER_STEPS } from "@/components/planner/step-indicator";
@@ -39,9 +41,11 @@ export default function PlanejadorPage() {
   const toggleAttraction = useTravelStore((s) => s.toggleAttraction);
   const toggleRestaurant = useTravelStore((s) => s.toggleRestaurant);
   const resetTrip = useTravelStore((s) => s.resetTrip);
+  const setFullTrip = useTravelStore((s) => s.setFullTrip);
   const addCompletedTrip = useTravelStore((s) => s.addCompletedTrip);
 
   const [step, setStep] = useState(0);
+  const [rolling, setRolling] = useState(false);
 
   const score = computeTripScore(trip, budget);
 
@@ -90,6 +94,16 @@ export default function PlanejadorPage() {
     setStep(0);
   }
 
+  function handleSurpriseMe() {
+    setRolling(true);
+    setTimeout(() => {
+      const surprise = generateSurpriseTrip(budget);
+      setFullTrip(surprise);
+      setRolling(false);
+      setStep(6);
+    }, 900);
+  }
+
   return (
     <div>
       <LiveStatsBar
@@ -115,6 +129,21 @@ export default function PlanejadorPage() {
         <motion.div key={step} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
           {step === 0 && (
             <StepSection title="Para onde vamos?" subtitle="Escolha o destino da sua viagem fictícia">
+              <motion.button
+                onClick={handleSurpriseMe}
+                disabled={rolling}
+                whileTap={{ scale: 0.97 }}
+                className="w-full mb-5 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent via-primary to-secondary text-white font-bold py-3.5 text-sm hover:brightness-110 transition disabled:opacity-70"
+              >
+                <motion.span
+                  animate={rolling ? { rotate: 360 } : {}}
+                  transition={rolling ? { repeat: Infinity, duration: 0.5, ease: "linear" } : {}}
+                >
+                  <Dice5 className="size-4" />
+                </motion.span>
+                {rolling ? "Sorteando sua viagem..." : "🎲 Me Surpreenda! Monte uma viagem aleatória"}
+              </motion.button>
+
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {DESTINATIONS.map((d) => {
                   const selected = trip.destination?.id === d.id;

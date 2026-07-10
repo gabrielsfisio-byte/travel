@@ -6,6 +6,7 @@ import { Compass, Flag, Heart, MapPin, Sparkles, TrendingUp, Trophy, User } from
 import { useTravelStore } from "@/store/travel-store";
 import { computeAchievements, computeLevel, countriesVisited } from "@/lib/achievements";
 import { AchievementBadge } from "@/components/profile/achievement-badge";
+import { CountryCollection } from "@/components/profile/country-collection";
 import { TripHistoryCard } from "@/components/profile/trip-history-card";
 import { PremiumGate } from "@/components/premium-gate";
 import { useAuth } from "@/hooks/use-auth";
@@ -87,6 +88,15 @@ export default function PerfilPage() {
           <StatCard icon={Trophy} label="Conquistas" value={`${unlockedCount}/${achievements.length}`} />
           <StatCard icon={Heart} label="Favoritos salvos" value={totalFavorites} />
         </div>
+      </div>
+
+      {/* Country Collection */}
+      <div>
+        <h2 className="font-display text-lg font-bold mb-4 flex items-center gap-2">
+          <Compass className="size-5 text-primary" />
+          Coleção de países
+        </h2>
+        <CountryCollection visitedCountries={countries} />
       </div>
 
       {/* Advanced stats (Premium) */}

@@ -28,6 +28,7 @@ interface TravelState {
   toggleAttraction: (a: Attraction) => void;
   toggleRestaurant: (r: Restaurant) => void;
   resetTrip: () => void;
+  setFullTrip: (trip: TripSelection) => void;
   addCompletedTrip: (trip: CompletedTrip) => void;
 
   toggleFavoriteDestination: (id: string) => void;
@@ -87,6 +88,8 @@ export const useTravelStore = create<TravelState>()(
         }),
 
       resetTrip: () => set({ trip: emptyTrip }),
+
+      setFullTrip: (trip) => set({ trip }),
 
       addCompletedTrip: (trip) => set((s) => ({ completedTrips: [trip, ...s.completedTrips] })),
 
